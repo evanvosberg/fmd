@@ -1,0 +1,33 @@
+{
+	"name": "fmd",
+	"title": "factory-module-definition",
+	"description": "Factory Module Definition a simple factory module wrapper (Node, AMD, Browser, ...).",
+	"version": "0.0.1",
+	"homepage": "http://github.com/evanvosberg/fmd",
+	"author": {
+		"name": "Evan Vosberg",
+		"url": "http://github.com/evanvosberg"
+	},
+	"repository": {
+		"type": "git",
+		"url": "http://github.com/evanvosberg/fmd.git"
+	},
+	"bugs": {
+		"url": "http://github.com/evanvosberg/fmd/issues"
+	},
+	"licenses": [{
+		"type": "MIT",
+		"url": "http://www.opensource.org/licenses/MIT"
+	}],
+	"dependencies": {
+
+	},
+	"devDependencies": {
+		"async": "~0.2.7",
+		"client-http": "~0.0.4",
+		"colorplus": "~0.2.4",
+		"fs.extra": "~1.2.0",
+		"underscore": "~1.4.4"
+	},
+	"keywords": ["factory", "amd", "async", "module", "define", "require", "requirejs", "commonjs", "browser"]
+}
