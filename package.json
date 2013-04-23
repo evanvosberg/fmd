@@ -20,14 +20,14 @@
 		"url": "http://www.opensource.org/licenses/MIT"
 	}],
 	"dependencies": {
-
-	},
-	"devDependencies": {
 		"async": "~0.2.7",
 		"client-http": "~0.0.4",
 		"colorplus": "~0.2.4",
 		"fs.extra": "~1.2.0",
 		"underscore": "~1.4.4"
+	},
+	"devDependencies": {
+
 	},
 	"keywords": ["factory", "amd", "async", "module", "define", "require", "requirejs", "commonjs", "browser"]
 }
