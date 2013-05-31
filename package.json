@@ -2,7 +2,7 @@
 	"name": "fmd",
 	"title": "factory-module-definition",
 	"description": "Factory Module Definition a simple factory module wrapper (Node, AMD, Browser, ...).",
-	"version": "0.0.1",
+	"version": "0.0.2",
 	"homepage": "http://github.com/evanvosberg/fmd",
 	"author": {
 		"name": "Evan Vosberg",

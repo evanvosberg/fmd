@@ -27,7 +27,7 @@ require("fmd")({
   })
   .vendor("bar", "Bar")
   .define("foo", ["source/foo.js"], {
-    require: {
+    depends: {
       "bar": "Baz"
     },
     exports: "Foo",
@@ -253,7 +253,7 @@ fmd
     global: "Foo"
   })
   .define("foo/bar", ["http://example.com/foo/bar.js", "/soruces/foo/bar-extension.js"], {
-    require: {
+    depends: {
       "foo": "Foo",
       "bar": "Bar"
     },
@@ -282,7 +282,7 @@ fmd
     "foo/bar": [
       ["http://example.com/foo/bar.js", "/soruces/foo/bar-extension.js"],
       {
-        require: {
+        depends: {
           "foo": "Foo",
           "bar": "Bar"
         },
