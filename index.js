@@ -437,7 +437,7 @@
 						callback(null);
 					}
 					else {
-						async.concat(settings.sources, h.readFile, function (error, result) {
+						async.concatSeries(settings.sources, h.readFile, function (error, result) {
 							if (!error) {
 								settings.sourceScript = settings.concat.apply(self, result);
 							}
