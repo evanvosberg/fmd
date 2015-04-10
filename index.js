@@ -17,7 +17,7 @@
 		factories = {
 			"commonjs": {
 				when: function () {
-					return "typeof exports === \"object\"";
+					return "typeof exports === " + this.quote() + "object" + this.quote();
 				},
 				define: function () {
 					var depends = [],
@@ -26,7 +26,7 @@
 
 					// Compose dependencies
 					_.each(requires, function (require) {
-						depends.push("require(\"" + require + "\")");
+						depends.push("require(" + this.quote() + require + this.quote() + ")");
 					});
 
 					return "// CommonJS\nmodule.exports = exports = " + this.factory() + "(" + depends.join(", ") + ");";
@@ -35,18 +35,19 @@
 
 			"amd": {
 				when: function () {
-					return "typeof define === \"function\" && define.amd";
+
+					return "typeof define === " + this.quote() + "function" + this.quote() + " && define.amd";
 				},
 				define: function () {
-					var anonym = this.getOption("amd_not_anonymous") ? ("\"" + this.module() + "\", ") : "",
+					var anonym = this.getOption("amd_not_anonymous") ? (this.quote() + this.module() + this.quote() + ", ") : "",
 						depends = [],
 						requires = this.getModule()
 							.require;
 
 					// Compose dependencies
 					_.each(requires, function (require) {
-						depends.push("\"" + require + "\"");
-					});
+						depends.push(this.quote() + require + this.quote());
+					}, this);
 
 					return "// AMD\ndefine(" + anonym + "[" + depends.join(", ") + "]" + ", " + this.factory() + ");";
 				}
@@ -54,7 +55,7 @@
 
 			"global": {
 				when: function () {
-					return "typeof window !== \"undefined\" && window === " + this.root();
+					return "typeof window !== " + this.quote() + "undefined" + this.quote() + " && window === " + this.root();
 				},
 				define: function () {
 					var depends = [],
@@ -65,7 +66,7 @@
 							.global;
 
 					// Compose global exports
-					global = global ? (this.root() + FactoryModuleDefinition.securePropertyName(global) + " = ") : "";
+					global = global ? (this.root() + this.securePropertyName(global) + " = ") : "";
 
 					// Compose dependencies
 					_.each(requires, function (require, i) {
@@ -76,7 +77,7 @@
 							lastNoGlobal = i + 1;
 						}
 
-						depends.push(requireGlobal ? (this.root() + FactoryModuleDefinition.securePropertyName(requireGlobal)) : this.undef());
+						depends.push(requireGlobal ? (this.root() + this.securePropertyName(requireGlobal)) : this.undef());
 					}, this);
 
 					// Right trim undefined global dependencies
@@ -98,8 +99,7 @@
 					name[i].unshift(i);
 					handle.apply(this, name[i]);
 				}
-			}
-			else {
+			} else {
 				handle.apply(this, arguments);
 			}
 
@@ -132,15 +132,22 @@
 				return context.factory;
 			},
 
+			quote: function () {
+    		    return context.mfd.options.quote === "double" ? "\"" : "'";
+			},
+
 			module: function () {
 				return context.module;
 			},
 
+            securePropertyName: function (name) {
+        		return /^[A-Za-z_][A-Za-z0-9_]*$/.test(name) ? ("." + name) : ("[" + this.quote() + name.replace(/(["'])/g, "\\\$1") + this.quote() + "]");
+        	},
+
 			getModule: function (path) {
 				if (!path) {
 					path = context.module;
-				}
-				else if (/^\./.test(path)) {
+				} else if (/^\./.test(path)) {
 					path = (context.module + "/../" + path)
 						.replace(/[^\/]+\/\.\.\//g, "/")
 						.replace(/\/\.\//g, "/")
@@ -179,11 +186,9 @@
 
 				if (new_line === "mac") {
 					pattern = "\r";
-				}
-				else if (new_line === "win" || new_line === "windows") {
+				} else if (new_line === "win" || new_line === "windows") {
 					pattern = "\r\n";
-				}
-				else if (new_line === "unix" || force) {
+				} else if (new_line === "unix" || force) {
 					pattern = "\n";
 				}
 
@@ -234,19 +239,16 @@
 						if (error) {
 							warn(error);
 							callback(true, "");
-						}
-						else {
+						} else {
 							callback(false, data.toString());
 						}
 					});
-				}
-				else {
+				} else {
 					fs.readFile(path, function (error, data) {
 						if (error) {
 							warn(error);
 							callback(true, "");
-						}
-						else {
+						} else {
 							callback(false, data.toString());
 						}
 					});
@@ -277,18 +279,12 @@
 		if (!(instance instanceof FactoryModuleDefinition)) {
 			instance = new FactoryModuleDefinition(new Initialize());
 			instance.constructor.apply(instance, arguments);
-		}
-		else if (!(arguments[0] instanceof Initialize)) {
+		} else if (!(arguments[0] instanceof Initialize)) {
 			instance.constructor.apply(instance, arguments);
 		}
 
 		return instance;
 	}
-
-	// Secure property access string
-	FactoryModuleDefinition.securePropertyName = function (name) {
-		return /^[A-Za-z_][A-Za-z0-9_]*$/.test(name) ? ("." + name) : ("[\"" + name.replace(/"/g, "\\\"") + "\"]");
-	};
 
 	// Proto methods
 	FactoryModuleDefinition.prototype = {
@@ -304,6 +300,8 @@
 					new_line: null, // null, "unix", "mac", "windows", "\n", "\r", "\r\n" (null: don't change)
 
 					indent: null, // null, "\t", "  ", 1, 2, 3, ... (null: don't add indent, number: count of spaces)
+
+					quote: 'double', // "double", "single" (quote character)
 
 					amd_not_anonymous: null // true if amd definition should not be anonymous
 
@@ -363,8 +361,7 @@
 
 			if (typeof global === "function") {
 				settings.concat = global;
-			}
-			else if (typeof concat === "function") {
+			} else if (typeof concat === "function") {
 				settings.concat = concat;
 			}
 
@@ -404,8 +401,7 @@
 					if (pair[1]) {
 						settings.require.unshift(pair[0]);
 						settings.arguments.unshift(pair[1]);
-					}
-					else {
+					} else {
 						settings.require.push(pair[0]);
 					}
 				});
@@ -435,8 +431,7 @@
 					if (settings.sourceScript) {
 						// Next step
 						callback(null);
-					}
-					else {
+					} else {
 						async.concatSeries(settings.sources, h.readFile, function (error, result) {
 							if (!error) {
 								settings.sourceScript = settings.concat.apply(self, result);
@@ -452,8 +447,7 @@
 				function buildModule(callback) {
 					if (settings.type === "import") {
 						settings.sourceContent = settings.sourceScript;
-					}
-					else {
+					} else {
 						var defines = [],
 
 							factorySingle = self.options.factories.length <= 1,
@@ -478,12 +472,10 @@
 							if (factory) {
 								if (factorySingle) {
 									code += factory.define.call(context); // Build module defintion code
-								}
-								else {
+								} else {
 									if (factoryIndex !== factoryLast) {
 										code += "if (" + factory.when.call(context) + ") {\n"; // Build if condition
-									}
-									else {
+									} else {
 										code += "{\n";
 									}
 									code += h.addIndent(factory.define.call(context), 1, true); // Build module defintion code
@@ -496,13 +488,13 @@
 						});
 
 						content += ";(function (" + context.root() + ", " + context.factory() + (context.undef(true) ? ", " + context.undef() : "") + ") {\n";
-						content += h.rtrim(h.addIndent(defines.join("\nelse "), 1, true), true);
+						content += h.rtrim(h.addIndent(defines.join(" else "), 1, true), true);
 						content += "\n}(this, function (";
 						content += settings.arguments.join(", ");
 						content += ") {";
 						content += h.rtrim(settings.sourceScript ? h.addIndent("\n\n" + settings.sourceScript, 1) : "", true);
-						content += h.rtrim(settings.exports ? h.addIndent("\n\nreturn " + settings.exports + ";", 1) : "", true);
-						content += "\n\n}));";
+						content += h.rtrim(settings.exports ? h.addIndent("\n\nreturn " + settings.exports + ";\n", 1) : "", true);
+						content += "\n}));";
 
 						// Join wrap stack to content
 						settings.sourceContent = content;
