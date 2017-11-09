@@ -27,7 +27,7 @@
 					// Compose dependencies
 					_.each(requires, function (require) {
 						depends.push("require(" + this.quote() + require + this.quote() + ")");
-					});
+					}, this);
 
 					return "// CommonJS\nmodule.exports = exports = " + this.factory() + "(" + depends.join(", ") + ");";
 				}
